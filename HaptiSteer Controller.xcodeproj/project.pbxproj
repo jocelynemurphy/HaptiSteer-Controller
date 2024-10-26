@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B4AC8D272CCD7B70000D7286 /* BLEManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AC8D262CCD7B70000D7286 /* BLEManager.swift */; };
 		FBF925312CCD6EB60020CACF /* HaptiSteer_ControllerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBF925302CCD6EB60020CACF /* HaptiSteer_ControllerApp.swift */; };
 		FBF925332CCD6EB60020CACF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBF925322CCD6EB60020CACF /* ContentView.swift */; };
 		FBF925352CCD6EB80020CACF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FBF925342CCD6EB80020CACF /* Assets.xcassets */; };
@@ -34,6 +35,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B4AC8D262CCD7B70000D7286 /* BLEManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEManager.swift; sourceTree = "<group>"; };
 		FBF9252D2CCD6EB60020CACF /* HaptiSteer Controller.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HaptiSteer Controller.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FBF925302CCD6EB60020CACF /* HaptiSteer_ControllerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HaptiSteer_ControllerApp.swift; sourceTree = "<group>"; };
 		FBF925322CCD6EB60020CACF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -96,6 +98,7 @@
 			children = (
 				FBF925302CCD6EB60020CACF /* HaptiSteer_ControllerApp.swift */,
 				FBF925322CCD6EB60020CACF /* ContentView.swift */,
+				B4AC8D262CCD7B70000D7286 /* BLEManager.swift */,
 				FBF925342CCD6EB80020CACF /* Assets.xcassets */,
 				FBF925362CCD6EB80020CACF /* Preview Content */,
 			);
@@ -259,6 +262,7 @@
 			files = (
 				FBF925332CCD6EB60020CACF /* ContentView.swift in Sources */,
 				FBF925312CCD6EB60020CACF /* HaptiSteer_ControllerApp.swift in Sources */,
+				B4AC8D272CCD7B70000D7286 /* BLEManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -347,7 +351,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.7;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -404,7 +408,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.7;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -422,9 +426,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HaptiSteer Controller/Preview Content\"";
-				DEVELOPMENT_TEAM = AD85GVSW2B;
+				DEVELOPMENT_TEAM = WHTP766KU5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app needs Bluetooth access at all times to connect to ESP32";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This app uses Bluetooth to connect to ESP32";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -435,7 +441,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Haptisteer.HaptiSteer-Controller";
+				PRODUCT_BUNDLE_IDENTIFIER = "Haptisteer.HaptiSteer-Controller-1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -451,9 +457,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HaptiSteer Controller/Preview Content\"";
-				DEVELOPMENT_TEAM = AD85GVSW2B;
+				DEVELOPMENT_TEAM = WHTP766KU5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app needs Bluetooth access at all times to connect to ESP32";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This app uses Bluetooth to connect to ESP32";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -464,7 +472,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Haptisteer.HaptiSteer-Controller";
+				PRODUCT_BUNDLE_IDENTIFIER = "Haptisteer.HaptiSteer-Controller-1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
