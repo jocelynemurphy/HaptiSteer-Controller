@@ -160,32 +160,46 @@ let maneuverMapping: [String: Int] = [ // mapping of all the different maneuvers
     "continue": 29 // 1 BOTH
 ]
 
-func calculateDistance(directions: DirectionsResponse){
-    @StateObject var locationManager = LocationTrackerViewController()
-    
-//    for step in steps{
-//        // do polling every 1 second
-//        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-//            print("hello")
-//        }
-//        // find current location
-//        if let location = locationManager.currentLocation {
-//            var curr_lat = location.coordinate.latitude
-//            var curr_lng = location.coordinate.longitude
-//        } else {
-//            print("Fetching location...")
-//        }
-//        
-//        // do distance calculation
-//        var distance_remaining = 5 - 3
-//        
-//    }
+func calculateDistance(curr_lat: Double, curr_lng: Double) async -> (Double, Double) {
+    @ObservedObject var locationManager = LocationTrackerViewController()
+    // find current information
+    var starting_location = "\(curr_lat),\(curr_lng)"
+
+    print(starting_location)
+    // get a directions response
+    do {
+        let result = try await performAPICall(
+            origin: starting_location,
+            destination: "121+columbia+st+w+waterloo",
+            mode: "driving",
+            apiKey: "INSERT API KEY HERE"
+        )
+        
+        if let target_lat = result.routes.first?.legs.first?.steps.first?.endLocation.lat,
+           let target_lng = result.routes.first?.legs.first?.steps.first?.endLocation.lng {
+            
+            print("Target latitude: \(target_lat), Target longitude: \(target_lng)")
+            
+            let delta_lat = target_lat - curr_lat
+            let delta_lng = target_lng - curr_lng
+            
+            return(delta_lat, delta_lng)
+        } else {
+            // Handle the case where routes, legs, or steps are missing
+            print("No routes, legs, or steps found in the response.")
+        }
+        //        sendVibrations(result: result);
+    } catch {
+        print("Error fetching directions: \(error)")
+    }
+
+    return (-1.0, -1.0)
 }
     
 
 func sendVibrations(result: DirectionsResponse) {
     let steps = result.routes[0].legs[0].steps
-        
+    
     for step in steps{
         var distance_remaining = step.distance.value
         let m_per_iteration = 5
@@ -222,9 +236,11 @@ func sendManeuver(maneuver: String?){
 struct ContentView: View {
     @StateObject private var bleManager = BLEManager()
     @StateObject var locationManager = LocationTrackerViewController()
+
     @State var message: String = "Waiting for message..."
     @State var timer: Timer? = nil
     @State var isTimerRunning = 1  // Helper variable to track timer state
+
 
     
     // calling the api
@@ -299,36 +315,32 @@ struct ContentView: View {
             // BUTTON TO TOGGLE DISTANCE CALCULATION ON AND OFF
             Button(action: {
                 Task {
-                    do {
-                        let directions = try await performAPICall(
-                            origin: "engineering+7+university+of+waterloo",
-                            destination: "121+columbia+st+w+waterloo",
-                            mode: "driving",
-                            apiKey: "AIzaSyCuOkgpExbObB7dnwHbGCmT31vxEdZFJrw"
-                        )
-                        // get the steps
-                        var steps = directions.routes[0].legs[0].steps
-
-                        for step in steps {
-                            // check to see if the timer is on or off
-                            if timer == nil {
-                                // Start the timer
-                                timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-                                    print("Timer is running")
-                                    
-                                    calculateDistance(directions: directions)
-                                }
-                            } else {
-                                // Stop the timer if it's already running
-                                timer?.invalidate()
-                                timer = nil
-                                print("Next Step")
-                            }
+                    
+                        var curr_lat = 0.00
+                        var curr_lng = 0.00
+                        
+                        if let location = locationManager.currentLocation{
+                            curr_lat = location.coordinate.latitude
+                            curr_lng = location.coordinate.longitude
+                            
+                        } else {
+                            print("Fetching location...")
                         }
-                    } catch {
-                        print("Error fetching directions: \(error)")
+                            
+                        await print(calculateDistance(curr_lat: curr_lat, curr_lng: curr_lng)) // this calculates one distance
+                            
+//                            if timer == nil {
+//                                // Start the timer
+//                                timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+//                                    print("Timer is running")                              
+//
+//                                }
+//                            } else {
+//                                // Stop the timer if it's already running
+//                                timer?.invalidate()
+//                                timer = nil
+//                                print("Next Step")
                     }
-                }
                     
             }) {
                 Text("Start live distance calculation")
