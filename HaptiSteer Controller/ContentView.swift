@@ -162,6 +162,9 @@ let maneuverMapping: [String: Int] = [ // mapping of all the different maneuvers
 
 func calculateDistance(curr_lat: Double, curr_lng: Double) async -> (Double, Double) {
     @ObservedObject var locationManager = LocationTrackerViewController()
+    
+    @State var apiKey: String = getApiKey()
+    
     // find current information
     var starting_location = "\(curr_lat),\(curr_lng)"
 
@@ -172,7 +175,7 @@ func calculateDistance(curr_lat: Double, curr_lng: Double) async -> (Double, Dou
             origin: starting_location,
             destination: "121+columbia+st+w+waterloo",
             mode: "driving",
-            apiKey: "INSERT API KEY HERE"
+            apiKey: apiKey
         )
         
         if let target_lat = result.routes.first?.legs.first?.steps.first?.endLocation.lat,
@@ -240,9 +243,10 @@ struct ContentView: View {
     @State var message: String = "Waiting for message..."
     @State var timer: Timer? = nil
     @State var isTimerRunning = 1  // Helper variable to track timer state
-
-
     
+    @State var apiKey = getApiKey()
+
+
     // calling the api
     var body: some View {
         VStack {
@@ -277,7 +281,7 @@ struct ContentView: View {
                             origin: "engineering+7+university+of+waterloo",
                             destination: "121+columbia+st+w+waterloo",
                             mode: "driving",
-                            apiKey: "AIzaSyCuOkgpExbObB7dnwHbGCmT31vxEdZFJrw"
+                            apiKey: apiKey
                         )
                         // take the set of instructions and output vibrations accordingly
                         sendVibrations(result: result);
