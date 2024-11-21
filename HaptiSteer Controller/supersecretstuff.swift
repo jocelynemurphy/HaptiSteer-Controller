@@ -45,7 +45,7 @@ func getApiKey() -> String {
     if status == errSecSuccess {
         let data = item as! Data
         let key = String(data: data, encoding: .utf8)
-        print("API Key: \(key!)")
+//        print("API Key: \(key!)")
         return key!
     } else{
         print("Error getting API key: \(status)")

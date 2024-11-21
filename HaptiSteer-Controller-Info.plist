@@ -27,9 +27,5 @@
 		<string>location</string>
 		<string>processing</string>
 	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We need your location to provide personalized content and services.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>We need your location to provide services even when the app is in the background.</string>
 </dict>
 </plist>

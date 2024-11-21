@@ -1,102 +1,6 @@
 import SwiftUI
 import CoreBluetooth
 import CoreLocation
-// ________________________________________________________________________
-// SET UP ALL STRUCTS
-// Root structure
-struct DirectionsResponse: Codable {
-    let geocodedWaypoints: [GeocodedWaypoint]?
-    let routes: [Route]
-    let status: String
-}
-
-struct GeocodedWaypoint: Codable {
-    let geocoderStatus: String
-    let placeID: String
-    let types: [String]
-    
-    enum CodingKeys: String, CodingKey {
-        case geocoderStatus = "geocoder_status"
-        case placeID = "place_id"
-        case types
-    }
-}
-
-struct Route: Codable {
-    let bounds: Bounds
-    let copyrights: String
-    let legs: [Leg]
-    let overviewPolyline: Polyline
-    let summary: String
-    let warnings: [String]
-    let waypointOrder: [Int]
-    
-    enum CodingKeys: String, CodingKey {
-        case bounds, copyrights, legs
-        case overviewPolyline = "overview_polyline"
-        case summary, warnings
-        case waypointOrder = "waypoint_order"
-    }
-}
-
-struct Bounds: Codable {
-    let northeast: Location
-    let southwest: Location
-}
-
-struct Location: Codable {
-    let lat: Double
-    let lng: Double
-}
-
-struct Leg: Codable {
-    let distance: TextValue
-    let duration: TextValue
-    let endAddress: String
-    let endLocation: Location
-    let startAddress: String
-    let startLocation: Location
-    let steps: [Step]
-    
-    enum CodingKeys: String, CodingKey {
-        case distance, duration
-        case endAddress = "end_address"
-        case endLocation = "end_location"
-        case startAddress = "start_address"
-        case startLocation = "start_location"
-        case steps
-    }
-}
-
-struct Step: Codable {
-    let distance: TextValue
-    let duration: TextValue
-    let endLocation: Location
-    let htmlInstructions: String
-    let maneuver: String?
-    let polyline: Polyline
-    let startLocation: Location
-    let travelMode: String
-    
-    enum CodingKeys: String, CodingKey {
-        case distance, duration
-        case endLocation = "end_location"
-        case htmlInstructions = "html_instructions"
-        case maneuver
-        case polyline, startLocation = "start_location"
-        case travelMode = "travel_mode"
-    }
-}
-
-struct TextValue: Codable {
-    let text: String
-    let value: Int
-}
-
-struct Polyline: Codable {
-    let points: String
-}
-// ________________________________________________________________________
 
 func performAPICall(origin: String, destination: String, mode: String, apiKey: String) async throws -> DirectionsResponse {
     let urlString = "https://maps.googleapis.com/maps/api/directions/json"
@@ -198,6 +102,34 @@ func calculateDistance(curr_lat: Double, curr_lng: Double) async -> (Double, Dou
 
     return (-1.0, -1.0)
 }
+
+func distFromLocation(curr_lat: Double, curr_lng: Double) async -> Double? {
+    @ObservedObject var locationManager = LocationTrackerViewController()
+    
+    @State var apiKey: String = getApiKey()
+    
+    // find current information
+    var starting_location = "\(curr_lat),\(curr_lng)"
+
+    do {
+        let result = try await performAPICall(
+            origin: starting_location,
+            destination: "121+columbia+st+w+waterloo",
+            mode: "driving",
+            apiKey: apiKey
+        )
+        
+        let dist = checkDistanceToPolyline(curr_lat: curr_lat, curr_long: curr_lng, encodedPolyline: "qzihGvpqjNUNK_@K_@k@mB")
+        
+        return (dist)
+        
+    } catch {
+        print("Error fetching directions: \(error)")
+    }
+    
+    return 0.0
+}
+    
     
 
 func sendVibrations(result: DirectionsResponse) {
@@ -316,44 +248,65 @@ struct ContentView: View {
             }
             
            
-            // BUTTON TO TOGGLE DISTANCE CALCULATION ON AND OFF
+//            // BUTTON TO TOGGLE DISTANCE CALCULATION ON AND OFF
+//            Button(action: {
+//                Task {
+//                    
+//                        var curr_lat = 0.00
+//                        var curr_lng = 0.00
+//                        
+//                        if let location = locationManager.currentLocation{
+//                            curr_lat = location.coordinate.latitude
+//                            curr_lng = location.coordinate.longitude
+//                            
+//                        } else {
+//                            print("Fetching location...")
+//                        }
+//                            
+//                        await print(calculateDistance(curr_lat: curr_lat, curr_lng: curr_lng)) // this calculates one distance
+//                    
+//                        message = calculateDistance(curr_lat: curr_lat, curr_lng: curr_lng)
+//                            
+////                            if timer == nil {
+////                                // Start the timer
+////                                timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+////                                    print("Timer is running")                              
+////
+////                                }
+////                            } else {
+////                                // Stop the timer if it's already running
+////                                timer?.invalidate()
+////                                timer = nil
+////                                print("Next Step")
+//                    }
+//                    
+//            }) {
+//                Text("Start live distance calculation")
+//                    .padding()
+//                    .background(Color.red)
+//                    .foregroundColor(.white)
+//                    .cornerRadius(10)
+//            }
+            
             Button(action: {
                 Task {
-                    
-                        var curr_lat = 0.00
-                        var curr_lng = 0.00
-                        
-                        if let location = locationManager.currentLocation{
-                            curr_lat = location.coordinate.latitude
-                            curr_lng = location.coordinate.longitude
-                            
-                        } else {
-                            print("Fetching location...")
-                        }
-                            
-                        await print(calculateDistance(curr_lat: curr_lat, curr_lng: curr_lng)) // this calculates one distance
-                            
-//                            if timer == nil {
-//                                // Start the timer
-//                                timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-//                                    print("Timer is running")                              
-//
-//                                }
-//                            } else {
-//                                // Stop the timer if it's already running
-//                                timer?.invalidate()
-//                                timer = nil
-//                                print("Next Step")
-                    }
-                    
+                    if let location = locationManager.currentLocation {
+                        await message = String(
+                            distFromLocation(curr_lat: location.coordinate.latitude, curr_lng: location.coordinate.longitude)!
+                        )
+                    } else {
+                        message = "theres a problem with the location"
+                    }}
+                
             }) {
-                Text("Start live distance calculation")
+                Text("Check distance to polyline")
                     .padding()
-                    .background(Color.red)
+                    .background(Color.green)
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
 
+            
             // send messages to be visible in the app
             TextEditor(text: $message)
                             .frame(height: 200) // Height of the message box
