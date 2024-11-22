@@ -24,6 +24,10 @@ func performAPICall(origin: String, destination: String, mode: String) async thr
     let (data, _) = try await URLSession.shared.data(from: url)
     let response = try JSONDecoder().decode(DirectionsResponse.self, from: data)
     
+    if response.status != "OK" {
+        throw URLError(.badServerResponse)
+    }
+    
     return response
 }
 

@@ -36,9 +36,8 @@ struct ProcessingModal: View {
                     Text("🚀🚗 Processing Journey! 🚗🚀")
                         .font(.system(size: 24, weight: .bold))
                         .padding()
-                    
-                    Text("Additional processing can go here")
-                        .padding()
+                    // text box to show navRoute step index, distance to polyline
+                    Text("Step: \(navRoute.currentStepIndex)")
                 }
                 
                 Spacer()
@@ -72,19 +71,23 @@ struct ProcessingModal: View {
         }
     }
     
-    func recalculateRoute() async {
-        let currentLocation = getCurrentLocationString()
+    func resetRoute() async {
         
-        // Handle route recalculation here
-        do {
-            let result = try await performAPICall(
-                origin: currentLocation,
-                destination: "kens+sushi+house+waterloo",
-                mode: "driving"
-            )
-        } catch {
-            print("Error: \(error)")
-        }
+    //UNCOMMENT WHEN WE ARE READY TO TEST
+        
+//        let currentLocation = getCurrentLocationString()
+//        
+//        do {
+//            let result = try await performAPICall(
+//                origin: currentLocation,
+//                destination: "kens+sushi+house+waterloo",
+//                mode: "driving"
+//            )
+//            
+//            navRoute.updateRoute(apiResponse: result)
+//        } catch {
+//            print("Error: \(error)")
+//        }
     }
     
     func startNavigation(navRoute: NavRoute) {
@@ -105,6 +108,7 @@ struct ProcessingModal: View {
                 if distanceToPolyline > 20 {
                     print("Off route, recalculating...")
                     // Handle recalculation logic here
+                    await resetRoute()
                 }
                 
                 // Check distance to the next step
