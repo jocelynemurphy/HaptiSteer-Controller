@@ -119,7 +119,7 @@ func distFromLocation(curr_lat: Double, curr_lng: Double) async -> Double? {
             apiKey: apiKey
         )
         
-        let dist = checkDistanceToPolyline(curr_lat: curr_lat, curr_long: curr_lng, encodedPolyline: "qzihGvpqjNUNK_@K_@k@mB")
+        let dist = checkDistanceToPolyline2(curr_lat: curr_lat, curr_long: curr_lng, encodedPolyline: "qzihGvpqjNUNK_@K_@k@mB")
         
         return (dist)
         
@@ -170,6 +170,8 @@ func sendManeuver(maneuver: String?){
 
 struct ContentView: View {
     @StateObject private var bleManager = BLEManager()
+    @State private var showModal = false
+    @State private var navRoute: NavRoute
     @StateObject var locationManager = LocationTrackerViewController()
 
     @State var message: String = "Waiting for message..."
@@ -306,6 +308,35 @@ struct ContentView: View {
                     .cornerRadius(10)
             }
 
+            Button(action: {
+                Task {
+                    if let location = locationManager.currentLocation {
+                        let starting_location = "\(location.coordinate.latitude),\(location.coordinate.longitude)"
+                        
+                        let directions = try await performAPICall(
+                            origin: starting_location,
+                            destination: "kens+sushi+house+waterloo",
+                            mode: "driving",
+                            apiKey: apiKey
+                        )
+                        
+                        navRoute = NavRoute(apiResponse: directions)
+                        
+                        // Show the modal
+                        showModal = true
+                        
+                    } else {
+                        message = "theres a problem with the location"
+                    }
+                }
+                    
+                } ) {
+                Text("test route class")
+                    .padding()
+                    .background(Color.orange)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
             
             // send messages to be visible in the app
             TextEditor(text: $message)
@@ -315,6 +346,12 @@ struct ContentView: View {
             }
         .onAppear {
             bleManager.startScanning()
+        }
+        // Sheet modifier to present a modal
+        .sheet(isPresented: $showModal) {
+            ProcessingView(
+                navRoute: navRoute
+            )
         }
     }
 }

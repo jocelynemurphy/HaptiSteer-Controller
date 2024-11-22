@@ -64,17 +64,39 @@ func distanceFromPoint(_ point: CLLocationCoordinate2D, toLineSegmentBetween sta
     return pointLocation.distance(from: projectionLocation)
 }
 
-func checkDistanceToPolyline (curr_lat: Double, curr_long: Double, encodedPolyline: String) -> Double? {
+func checkDistanceToPolyline2 (curr_lat: Double, curr_long: Double, encodedPolyline: String) -> Double? {
     // Example usage:
     let encodedPolyline = "qzihGvpqjNUNK_@K_@k@mB" // Example polyline
 
     let coordinate = CLLocationCoordinate2D(latitude: curr_lat, longitude: curr_long)
     
     let distance = distanceFromCoordinateToPolyline(coordinate: coordinate, encodedPolyline: encodedPolyline)
-    print("Shortest distance to polyline: \(distance) meters")
    
+    print("Shortest distance to polyline: \(String(describing: distance)) meters")
     
     return distance
 }
 
+func checkDistanceToPolyline(step: RouteStep, location: CLLocationCoordinate2D) -> Double? {
+    let encodedPolyline = step.polylineEncoded
+    
+    let distance = distanceFromCoordinateToPolyline(coordinate: location, encodedPolyline: encodedPolyline)
+    print("Shortest distance to polyline: \(String(describing: distance)) meters")
+    
+    return distance
+}
+
+
+// Calculate the distance between a location and the turn location of a step
+func checkDistanceToTurn(routeStep: RouteStep, location: CLLocationCoordinate2D) -> Double? {
+
+    // convert to this type to use distance method
+    let turnLocation = CLLocation(latitude: routeStep.endLocation.lat, longitude: routeStep.endLocation.lng)
+    let location = CLLocation(latitude: location.latitude, longitude: location.longitude)
+
+    // Calculate the distance in meters
+    let distance = location.distance(from: turnLocation)
+
+    return distance
+}
 
