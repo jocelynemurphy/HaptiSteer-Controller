@@ -26,7 +26,6 @@ func distanceFromCoordinateToPolyline(coordinate: CLLocationCoordinate2D, encode
 
     // Calculate the shortest distance to each segment of the polyline
     for i in 0..<polyline_coords.count - 1 {
-        print("current coord", polyline_coords[i])
         let segmentStart = polyline_coords[i]
         let segmentEnd = polyline_coords[i + 1]
         let distance = distanceFromPoint(coordinate, toLineSegmentBetween: segmentStart, and: segmentEnd)
@@ -72,7 +71,7 @@ func checkDistanceToPolyline2 (curr_lat: Double, curr_long: Double, encodedPolyl
     
     let distance = distanceFromCoordinateToPolyline(coordinate: coordinate, encodedPolyline: encodedPolyline)
    
-    print("Shortest distance to polyline: \(String(describing: distance)) meters")
+    print("shortest distance to polyline: \(String(describing: distance)) meters")
     
     return distance
 }

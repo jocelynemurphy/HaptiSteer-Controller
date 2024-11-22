@@ -2,7 +2,9 @@ import SwiftUI
 import CoreBluetooth
 import CoreLocation
 
-func performAPICall(origin: String, destination: String, mode: String, apiKey: String) async throws -> DirectionsResponse {
+func performAPICall(origin: String, destination: String, mode: String) async throws -> DirectionsResponse {
+    let apiKey = getApiKey()
+    
     let urlString = "https://maps.googleapis.com/maps/api/directions/json"
     guard var urlComponents = URLComponents(string: urlString) else {
         throw URLError(.badURL)
@@ -18,7 +20,7 @@ func performAPICall(origin: String, destination: String, mode: String, apiKey: S
     guard let url = urlComponents.url else {
         throw URLError(.badURL)
     }
-
+    
     let (data, _) = try await URLSession.shared.data(from: url)
     let response = try JSONDecoder().decode(DirectionsResponse.self, from: data)
     
@@ -71,15 +73,14 @@ func calculateDistance(curr_lat: Double, curr_lng: Double) async -> (Double, Dou
     
     // find current information
     var starting_location = "\(curr_lat),\(curr_lng)"
-
+    
     print(starting_location)
     // get a directions response
     do {
         let result = try await performAPICall(
             origin: starting_location,
             destination: "121+columbia+st+w+waterloo",
-            mode: "driving",
-            apiKey: apiKey
+            mode: "driving"
         )
         
         if let target_lat = result.routes.first?.legs.first?.steps.first?.endLocation.lat,
@@ -99,7 +100,7 @@ func calculateDistance(curr_lat: Double, curr_lng: Double) async -> (Double, Dou
     } catch {
         print("Error fetching directions: \(error)")
     }
-
+    
     return (-1.0, -1.0)
 }
 
@@ -110,13 +111,12 @@ func distFromLocation(curr_lat: Double, curr_lng: Double) async -> Double? {
     
     // find current information
     var starting_location = "\(curr_lat),\(curr_lng)"
-
+    
     do {
         let result = try await performAPICall(
             origin: starting_location,
             destination: "121+columbia+st+w+waterloo",
-            mode: "driving",
-            apiKey: apiKey
+            mode: "driving"
         )
         
         let dist = checkDistanceToPolyline2(curr_lat: curr_lat, curr_long: curr_lng, encodedPolyline: "qzihGvpqjNUNK_@K_@k@mB")
@@ -129,8 +129,8 @@ func distFromLocation(curr_lat: Double, curr_lng: Double) async -> Double? {
     
     return 0.0
 }
-    
-    
+
+
 
 func sendVibrations(result: DirectionsResponse) {
     let steps = result.routes[0].legs[0].steps
@@ -139,7 +139,7 @@ func sendVibrations(result: DirectionsResponse) {
         var distance_remaining = step.distance.value
         let m_per_iteration = 5
         var instruction_given = 0
-                
+        
         while distance_remaining > 0 {
             print(distance_remaining, "m remaining.")
             if distance_remaining < 10{
@@ -171,23 +171,23 @@ func sendManeuver(maneuver: String?){
 struct ContentView: View {
     @StateObject private var bleManager = BLEManager()
     @State private var showModal = false
-    @State private var navRoute: NavRoute
+    @State private var navRoute: NavRoute? = nil
     @StateObject var locationManager = LocationTrackerViewController()
-
+    
     @State var message: String = "Waiting for message..."
     @State var timer: Timer? = nil
     @State var isTimerRunning = 1  // Helper variable to track timer state
     
     @State var apiKey = getApiKey()
-
-
+    
+    
     // calling the api
     var body: some View {
         VStack {
             Text("HaptiSteer Controller")
                 .font(.largeTitle)
                 .padding()
-
+            
             if let message = bleManager.receivedMessage {
                 Text("Received Message: \(message)")
                     .padding()
@@ -195,7 +195,7 @@ struct ContentView: View {
                 Text("No messages from esp :(")
                     .padding()
             }
-
+            
             // Button to send a message to ESP32
             Button(action: {
                 bleManager.sendMessage("Hello from iPhone")
@@ -214,12 +214,14 @@ struct ContentView: View {
                         let result = try await performAPICall(
                             origin: "engineering+7+university+of+waterloo",
                             destination: "121+columbia+st+w+waterloo",
-                            mode: "driving",
-                            apiKey: apiKey
+                            mode: "driving"
                         )
+                        
+                        print(result)
+                        
                         // take the set of instructions and output vibrations accordingly
                         sendVibrations(result: result);
-                    
+                        
                     } catch {
                         print("Error fetching directions: \(error)")
                     }
@@ -231,8 +233,8 @@ struct ContentView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
-        
-
+            
+            
             Button(action: {
                 Task {
                     if let location = locationManager.currentLocation {
@@ -249,46 +251,46 @@ struct ContentView: View {
                     .cornerRadius(10)
             }
             
-           
-//            // BUTTON TO TOGGLE DISTANCE CALCULATION ON AND OFF
-//            Button(action: {
-//                Task {
-//                    
-//                        var curr_lat = 0.00
-//                        var curr_lng = 0.00
-//                        
-//                        if let location = locationManager.currentLocation{
-//                            curr_lat = location.coordinate.latitude
-//                            curr_lng = location.coordinate.longitude
-//                            
-//                        } else {
-//                            print("Fetching location...")
-//                        }
-//                            
-//                        await print(calculateDistance(curr_lat: curr_lat, curr_lng: curr_lng)) // this calculates one distance
-//                    
-//                        message = calculateDistance(curr_lat: curr_lat, curr_lng: curr_lng)
-//                            
-////                            if timer == nil {
-////                                // Start the timer
-////                                timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-////                                    print("Timer is running")                              
-////
-////                                }
-////                            } else {
-////                                // Stop the timer if it's already running
-////                                timer?.invalidate()
-////                                timer = nil
-////                                print("Next Step")
-//                    }
-//                    
-//            }) {
-//                Text("Start live distance calculation")
-//                    .padding()
-//                    .background(Color.red)
-//                    .foregroundColor(.white)
-//                    .cornerRadius(10)
-//            }
+            
+            //            // BUTTON TO TOGGLE DISTANCE CALCULATION ON AND OFF
+            //            Button(action: {
+            //                Task {
+            //
+            //                        var curr_lat = 0.00
+            //                        var curr_lng = 0.00
+            //
+            //                        if let location = locationManager.currentLocation{
+            //                            curr_lat = location.coordinate.latitude
+            //                            curr_lng = location.coordinate.longitude
+            //
+            //                        } else {
+            //                            print("Fetching location...")
+            //                        }
+            //
+            //                        await print(calculateDistance(curr_lat: curr_lat, curr_lng: curr_lng)) // this calculates one distance
+            //
+            //                        message = calculateDistance(curr_lat: curr_lat, curr_lng: curr_lng)
+            //
+            ////                            if timer == nil {
+            ////                                // Start the timer
+            ////                                timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            ////                                    print("Timer is running")
+            ////
+            ////                                }
+            ////                            } else {
+            ////                                // Stop the timer if it's already running
+            ////                                timer?.invalidate()
+            ////                                timer = nil
+            ////                                print("Next Step")
+            //                    }
+            //
+            //            }) {
+            //                Text("Start live distance calculation")
+            //                    .padding()
+            //                    .background(Color.red)
+            //                    .foregroundColor(.white)
+            //                    .cornerRadius(10)
+            //            }
             
             Button(action: {
                 Task {
@@ -307,7 +309,8 @@ struct ContentView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
-
+            
+            // Button to test route classes
             Button(action: {
                 Task {
                     if let location = locationManager.currentLocation {
@@ -316,21 +319,21 @@ struct ContentView: View {
                         let directions = try await performAPICall(
                             origin: starting_location,
                             destination: "kens+sushi+house+waterloo",
-                            mode: "driving",
-                            apiKey: apiKey
+                            mode: "driving"
                         )
                         
                         navRoute = NavRoute(apiResponse: directions)
                         
-                        // Show the modal
-                        showModal = true
+                        if navRoute != nil {
+                            showModal = true
+                        }
                         
                     } else {
                         message = "theres a problem with the location"
                     }
                 }
-                    
-                } ) {
+                
+            } ) {
                 Text("test route class")
                     .padding()
                     .background(Color.orange)
@@ -340,18 +343,18 @@ struct ContentView: View {
             
             // send messages to be visible in the app
             TextEditor(text: $message)
-                            .frame(height: 200) // Height of the message box
-                            .border(Color.gray, width: 1) // Optional border to define the box
-                            .padding()
-            }
+                .frame(height: 200) // Height of the message box
+                .border(Color.gray, width: 1) // Optional border to define the box
+                .padding()
+        }
         .onAppear {
             bleManager.startScanning()
         }
         // Sheet modifier to present a modal
         .sheet(isPresented: $showModal) {
-            ProcessingView(
-                navRoute: navRoute
-            )
+            if let navRoute = navRoute {
+                ProcessingModal(navRoute: navRoute)
+            }
         }
     }
 }

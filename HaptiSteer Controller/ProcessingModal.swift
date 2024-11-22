@@ -1,7 +1,7 @@
 import SwiftUI
 import CoreLocation
 
-struct ProcessingView: View {
+struct ProcessingModal: View {
     @StateObject var locationManager = LocationTrackerViewController()
     @Environment(\.dismiss) var dismiss // Environment variable to dismiss the modal
     let navRoute: NavRoute // Pass the NavRoute object from ContentView
@@ -16,10 +16,10 @@ struct ProcessingView: View {
                 .ignoresSafeArea()
             
             VStack {
-                // "X" button near the top
                 HStack {
                     Button("X") {
-                        dismiss() // Close the modal
+                        isNavigating = false
+                        dismiss() // close the modal
                     }
                     .padding(10)
                     .background(Color.pink)
@@ -29,7 +29,8 @@ struct ProcessingView: View {
                     Spacer() // Push the button to the left
                 }
                 .padding()
-                Spacer() // Push the rest of the content to the center
+                
+                Spacer()
                 
                 VStack {
                     Text("🚀🚗 Processing Journey! 🚗🚀")
@@ -40,21 +41,25 @@ struct ProcessingView: View {
                         .padding()
                 }
                 
-                Spacer() // Center the content vertically
+                Spacer()
             }
-        }.onAppear {
-            // Start the navigation loop
+        }
+        .onAppear {
+            // immediately start navigation when the modal appears
             startNavigation(navRoute: navRoute)
+        }
+        .onDisappear {
+            // stop navigation when the modal is swiped away
+            isNavigating = false
         }
     }
     
-    func getCurrentLocationString () -> String? {
+    func getCurrentLocationString() -> String {
         if let location = locationManager.currentLocation {
-            let curr_location = "\(location.coordinate.latitude), \(location.coordinate.longitude)"
-            return curr_location
+            return "\(location.coordinate.latitude), \(location.coordinate.longitude)"
         } else {
             print("Location not available.")
-            return nil
+            return ""
         }
     }
     
@@ -67,10 +72,23 @@ struct ProcessingView: View {
         }
     }
     
+    func recalculateRoute() async {
+        let currentLocation = getCurrentLocationString()
+        
+        // Handle route recalculation here
+        do {
+            let result = try await performAPICall(
+                origin: currentLocation,
+                destination: "kens+sushi+house+waterloo",
+                mode: "driving"
+            )
+        } catch {
+            print("Error: \(error)")
+        }
+    }
+    
     func startNavigation(navRoute: NavRoute) {
-        
         print("Starting navigation...")
-        
         
         Task {
             while isNavigating, let currentLocation = locationManager.currentLocation {
@@ -81,15 +99,12 @@ struct ProcessingView: View {
                 
                 let currentStep = navRoute.getStep(stepIndex: currentStepIndex)
                 
-                
                 // Check distance to the current polyline
                 let distanceToPolyline = checkDistanceToPolyline(step: currentStep, location: currentLocation) ?? 0
                 
                 if distanceToPolyline > 20 {
-                    print("off route, recalculating...")
+                    print("Off route, recalculating...")
                     // Handle recalculation logic here
-                    
-                    
                 }
                 
                 // Check distance to the next step
@@ -101,15 +116,18 @@ struct ProcessingView: View {
                     navRoute.advanceStepindex()
                     
                     print("Advancing to step index \(currentStepIndex)")
-                    
-                    // handle haptic path feedback
-                    
                 } else {
                     // Handle haptic feedback
-                    
                 }
                 
-                // lets pause for one second before running again
+                // Stopping case with case
+                if currentStepIndex >= navRoute.routeSteps.count {
+                    print("End of route reached.")
+                    isNavigating = false
+                    return
+                }
+                
+                // Pause for one second before running again
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
             }
         }
