@@ -4,6 +4,9 @@ import CoreLocation
 struct ProcessingModal: View {
     @StateObject var locationManager = LocationTrackerViewController()
     @Environment(\.dismiss) var dismiss // Environment variable to dismiss the modal
+    
+    @State var status: String = "getting status" // Check if the user is on route
+    
     let navRoute: NavRoute // Pass the NavRoute object from ContentView
     
     @State private var currentStepIndex = 0 // Track the current step
@@ -28,16 +31,18 @@ struct ProcessingModal: View {
                     
                     Spacer() // Push the button to the left
                 }
-                .padding()
-                
-                Spacer()
-                
+                .padding(.bottom, 40)
                 VStack {
                     Text("🚀🚗 Processing Journey! 🚗🚀")
                         .font(.system(size: 24, weight: .bold))
                         .padding()
                     // text box to show navRoute step index, distance to polyline
+                    Text("Destination: 330 phillip st")
                     Text("Step: \(navRoute.currentStepIndex)")
+                    Text("Upcoming Maneuver: \(navRoute.getStep(stepIndex: navRoute.currentStepIndex).direction)")
+                    Text("Distance to Turning point: \(checkDistanceToTurn(routeStep: navRoute.getStep(stepIndex: navRoute.currentStepIndex), location: getCurrentLocation()) ?? 0)")
+                    Text("Distance to polyline: \(checkDistanceToPolyline(step: navRoute.getStep(stepIndex: navRoute.currentStepIndex), location: getCurrentLocation()) ?? 0)")
+                    Text("status: \(status)")
                 }
                 
                 Spacer()
@@ -73,21 +78,22 @@ struct ProcessingModal: View {
     
     func resetRoute() async {
         
-    //UNCOMMENT WHEN WE ARE READY TO TEST
+//    UNCOMMENT WHEN WE ARE READY TO TEST
         
-//        let currentLocation = getCurrentLocationString()
-//        
-//        do {
-//            let result = try await performAPICall(
-//                origin: currentLocation,
-//                destination: "kens+sushi+house+waterloo",
-//                mode: "driving"
-//            )
-//            
-//            navRoute.updateRoute(apiResponse: result)
-//        } catch {
-//            print("Error: \(error)")
-//        }
+        let currentLocation = getCurrentLocationString()
+
+        do {
+            let result = try await performAPICall(
+                origin: currentLocation,
+                destination: "kens+sushi+house+waterloo",
+                mode: "driving"
+            )
+
+            navRoute.updateRoute(apiResponse: result)
+            
+        } catch {
+            print("Error: \(error)")
+        }
     }
     
     func startNavigation(navRoute: NavRoute) {
@@ -105,21 +111,25 @@ struct ProcessingModal: View {
                 // Check distance to the current polyline
                 let distanceToPolyline = checkDistanceToPolyline(step: currentStep, location: currentLocation) ?? 0
                 
-                if distanceToPolyline > 20 {
+                if distanceToPolyline > 25 {
                     print("Off route, recalculating...")
                     // Handle recalculation logic here
+                    status = "Off route, recalculating..."
                     await resetRoute()
+                } else {
+                    status = "On route :D"
                 }
                 
                 // Check distance to the next step
                 let distanceToTurn = checkDistanceToTurn(routeStep: currentStep, location: currentLocation) ?? 0
                 
-                if distanceToTurn < 10 {
+                if distanceToTurn < 15 {
                     // Move to the next step
                     currentStepIndex += 1
                     navRoute.advanceStepindex()
                     
                     print("Advancing to step index \(currentStepIndex)")
+                    status = "Advancing to step index \(currentStepIndex)"
                 } else {
                     // Handle haptic feedback
                 }
@@ -127,6 +137,7 @@ struct ProcessingModal: View {
                 // Stopping case with case
                 if currentStepIndex >= navRoute.routeSteps.count {
                     print("End of route reached.")
+                    status = "End of route reached"
                     isNavigating = false
                     return
                 }

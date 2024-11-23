@@ -52,6 +52,7 @@ class NavRoute {
     func updateRoute(apiResponse: DirectionsResponse) {
         let steps = apiResponse.routes[0].legs.first?.steps
         
+        self.currentStepIndex = 0
         self.routeSteps = processPolylineSegments(steps: steps)
     }
     

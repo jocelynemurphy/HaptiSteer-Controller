@@ -83,7 +83,7 @@ func calculateDistance(curr_lat: Double, curr_lng: Double) async -> (Double, Dou
     do {
         let result = try await performAPICall(
             origin: starting_location,
-            destination: "121+columbia+st+w+waterloo",
+            destination: "330+phillip+st+waterloo",
             mode: "driving"
         )
         
@@ -119,7 +119,7 @@ func distFromLocation(curr_lat: Double, curr_lng: Double) async -> Double? {
     do {
         let result = try await performAPICall(
             origin: starting_location,
-            destination: "121+columbia+st+w+waterloo",
+            destination: "330+phillip+st+waterloo",
             mode: "driving"
         )
         
@@ -217,7 +217,7 @@ struct ContentView: View {
                     do {
                         let result = try await performAPICall(
                             origin: "engineering+7+university+of+waterloo",
-                            destination: "121+columbia+st+w+waterloo",
+                            destination: "330+phillip+st+waterloo",
                             mode: "driving"
                         )
                         
@@ -314,7 +314,7 @@ struct ContentView: View {
                     .cornerRadius(10)
             }
             
-            // Button to test route classes
+            // Button to test route classes + navigating
             Button(action: {
                 Task {
                     if let location = locationManager.currentLocation {
@@ -322,7 +322,7 @@ struct ContentView: View {
                         
                         let directions = try await performAPICall(
                             origin: starting_location,
-                            destination: "kens+sushi+house+waterloo",
+                            destination: "330+phillip+st+waterloo",
                             mode: "driving"
                         )
                         
@@ -338,7 +338,7 @@ struct ContentView: View {
                 }
                 
             } ) {
-                Text("test route class")
+                Text("test navigating!")
                     .padding()
                     .background(Color.orange)
                     .foregroundColor(.white)

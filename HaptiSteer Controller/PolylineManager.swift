@@ -15,7 +15,7 @@ func decodePolyline(encodedPolyline: String) -> [LocationCoordinate2D]? {
     return decodedPolyline
 }
 
-func distanceFromCoordinateToPolyline(coordinate: CLLocationCoordinate2D, encodedPolyline: String) -> Double? {
+func distanceFromCoordinateToPolyline(coordinate: CLLocationCoordinate2D, encodedPolyline: String, tolerance: Double = 10.0) -> Double? {
     // Decode the polyline
     guard let polyline_coords = decodePolyline(encodedPolyline: encodedPolyline), polyline_coords.count > 1 else {
         print("Invalid or empty polyline.")
@@ -30,6 +30,12 @@ func distanceFromCoordinateToPolyline(coordinate: CLLocationCoordinate2D, encode
         let segmentEnd = polyline_coords[i + 1]
         let distance = distanceFromPoint(coordinate, toLineSegmentBetween: segmentStart, and: segmentEnd)
         minDistance = min(minDistance, distance)
+    }
+
+    // If the distance is within the tolerance, consider it as "on the polyline"
+    if minDistance <= tolerance {
+        print("Coordinate is within tolerance (\(tolerance) meters) of the polyline. Treating as 'on the path.'")
+        return 0
     }
 
     return minDistance
