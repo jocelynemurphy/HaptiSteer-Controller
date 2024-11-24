@@ -36,6 +36,8 @@ func distanceFromCoordinateToPolyline(coordinate: CLLocationCoordinate2D, encode
     if minDistance <= tolerance {
         print("Coordinate is within tolerance (\(tolerance) meters) of the polyline. Treating as 'on the path.'")
         return 0
+    } else {
+        minDistance -= tolerance
     }
 
     return minDistance

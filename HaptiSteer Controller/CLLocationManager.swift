@@ -41,3 +41,27 @@ class LocationTrackerViewController: NSObject, ObservableObject, CLLocationManag
         }
     }
 }
+
+class LocationUtils {
+    static let locationManager = LocationTrackerViewController()
+    
+    
+    static func getCurrentLocationString() -> String {
+        if let location = locationManager.currentLocation {
+            return "\(location.coordinate.latitude), \(location.coordinate.longitude)"
+        } else {
+            print("Location not available.")
+            return ""
+        }
+    }
+
+    static func getCurrentLocationCoordinates() -> CLLocationCoordinate2D {
+        if let location = locationManager.currentLocation {
+            return location.coordinate
+        } else {
+            print("Location not available.")
+            return CLLocationCoordinate2D()
+        }
+    }
+}
+

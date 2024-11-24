@@ -5,6 +5,8 @@ import CoreLocation
 func performAPICall(origin: String, destination: String, mode: String) async throws -> DirectionsResponse {
     let apiKey = getApiKey()
     
+    let destination = destination.replacingOccurrences(of: " ", with: "+")
+    
     let urlString = "https://maps.googleapis.com/maps/api/directions/json"
     guard var urlComponents = URLComponents(string: urlString) else {
         throw URLError(.badURL)
@@ -70,7 +72,7 @@ let maneuverMapping: [String: Int] = [ // mapping of all the different maneuvers
     "continue": 29 // 1 BOTH
 ]
 
-func calculateDistance(curr_lat: Double, curr_lng: Double) async -> (Double, Double) {
+func calculateDistance(curr_lat: Double, curr_lng: Double, destination: String) async -> (Double, Double) {
     @ObservedObject var locationManager = LocationTrackerViewController()
     
     @State var apiKey: String = getApiKey()
@@ -83,7 +85,7 @@ func calculateDistance(curr_lat: Double, curr_lng: Double) async -> (Double, Dou
     do {
         let result = try await performAPICall(
             origin: starting_location,
-            destination: "330+phillip+st+waterloo",
+            destination: destination,
             mode: "driving"
         )
         
@@ -108,7 +110,7 @@ func calculateDistance(curr_lat: Double, curr_lng: Double) async -> (Double, Dou
     return (-1.0, -1.0)
 }
 
-func distFromLocation(curr_lat: Double, curr_lng: Double) async -> Double? {
+func distFromLocation(curr_lat: Double, curr_lng: Double, destination: String) async -> Double? {
     @ObservedObject var locationManager = LocationTrackerViewController()
     
     @State var apiKey: String = getApiKey()
@@ -119,7 +121,7 @@ func distFromLocation(curr_lat: Double, curr_lng: Double) async -> Double? {
     do {
         let result = try await performAPICall(
             origin: starting_location,
-            destination: "330+phillip+st+waterloo",
+            destination: destination,
             mode: "driving"
         )
         
@@ -179,6 +181,7 @@ struct ContentView: View {
     @StateObject var locationManager = LocationTrackerViewController()
     
     @State var message: String = "Waiting for message..."
+    @State var destination: String = "330 phillip st waterloo"
     @State var timer: Timer? = nil
     @State var isTimerRunning = 1  // Helper variable to track timer state
     
@@ -211,13 +214,24 @@ struct ContentView: View {
                     .cornerRadius(10)
             }
             
+            Text("Where to?")
+                .font(.title2)
+                .bold()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            // Input text box to set the destination
+            TextField("" ,text: $destination)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .font(.title3)
+            
             // Button to call API
             Button(action: {
                 Task {
                     do {
+                                                
                         let result = try await performAPICall(
                             origin: "engineering+7+university+of+waterloo",
-                            destination: "330+phillip+st+waterloo",
+                            destination: destination,
                             mode: "driving"
                         )
                         
@@ -233,7 +247,7 @@ struct ContentView: View {
             }) {
                 Text("Get Directions")
                     .padding()
-                    .background(Color.blue)
+                    .background(Color.red)
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
@@ -250,7 +264,7 @@ struct ContentView: View {
             }) {
                 Text("Get Location")
                     .padding()
-                    .background(Color.red)
+                    .background(Color.orange)
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
@@ -296,23 +310,26 @@ struct ContentView: View {
             //                    .cornerRadius(10)
             //            }
             
-            Button(action: {
-                Task {
-                    if let location = locationManager.currentLocation {
-                        await message = String(
-                            distFromLocation(curr_lat: location.coordinate.latitude, curr_lng: location.coordinate.longitude)!
-                        )
-                    } else {
-                        message = "theres a problem with the location"
-                    }}
-                
-            }) {
-                Text("Check distance to polyline")
-                    .padding()
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
+            
+            // Button to test distance calculation to a polyline
+            
+//            Button(action: {
+//                Task {
+//                    if let location = locationManager.currentLocation {
+//                        await message = String(
+//                            distFromLocation(curr_lat: location.coordinate.latitude, curr_lng: location.coordinate.longitude)!
+//                        )
+//                    } else {
+//                        message = "theres a problem with the location"
+//                    }}
+//
+//            }) {
+//                Text("Check distance to polyline")
+//                    .padding()
+//                    .background(Color.green)
+//                    .foregroundColor(.white)
+//                    .cornerRadius(10)
+//            }
             
             // Button to test route classes + navigating
             Button(action: {
@@ -322,7 +339,7 @@ struct ContentView: View {
                         
                         let directions = try await performAPICall(
                             origin: starting_location,
-                            destination: "330+phillip+st+waterloo",
+                            destination: destination,
                             mode: "driving"
                         )
                         
@@ -340,7 +357,7 @@ struct ContentView: View {
             } ) {
                 Text("test navigating!")
                     .padding()
-                    .background(Color.orange)
+                    .background(Color.green)
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
@@ -357,7 +374,7 @@ struct ContentView: View {
         // Sheet modifier to present a modal
         .sheet(isPresented: $showModal) {
             if let navRoute = navRoute {
-                ProcessingModal(navRoute: navRoute)
+                ProcessingModal(navRoute: navRoute, destination: destination)
             }
         }
     }

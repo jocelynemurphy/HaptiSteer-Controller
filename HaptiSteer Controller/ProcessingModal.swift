@@ -7,7 +7,8 @@ struct ProcessingModal: View {
     
     @State var status: String = "getting status" // Check if the user is on route
     
-    let navRoute: NavRoute // Pass the NavRoute object from ContentView
+    let navRoute: NavRoute
+    let destination: String
     
     @State private var currentStepIndex = 0 // Track the current step
     @State private var isNavigating = true // Control the navigation loop
@@ -36,13 +37,15 @@ struct ProcessingModal: View {
                     Text("🚀🚗 Processing Journey! 🚗🚀")
                         .font(.system(size: 24, weight: .bold))
                         .padding()
-                    // text box to show navRoute step index, distance to polyline
-                    Text("Destination: 330 phillip st")
+                    
+                    // info on the journey
+                    Text("Destination: \(destination)")
                     Text("Step: \(navRoute.currentStepIndex)")
                     Text("Upcoming Maneuver: \(navRoute.getStep(stepIndex: navRoute.currentStepIndex).direction)")
-                    Text("Distance to Turning point: \(checkDistanceToTurn(routeStep: navRoute.getStep(stepIndex: navRoute.currentStepIndex), location: getCurrentLocation()) ?? 0)")
-                    Text("Distance to polyline: \(checkDistanceToPolyline(step: navRoute.getStep(stepIndex: navRoute.currentStepIndex), location: getCurrentLocation()) ?? 0)")
-                    Text("status: \(status)")
+                    Text("Distance to Turning point: \(checkDistanceToTurn(routeStep: navRoute.getStep(stepIndex: navRoute.currentStepIndex), location: LocationUtils.getCurrentLocationCoordinates()) ?? 0)")
+                    
+                    Text("Distance to polyline: \(checkDistanceToPolyline(step: navRoute.getStep(stepIndex: navRoute.currentStepIndex), location: LocationUtils.getCurrentLocationCoordinates()) ?? 0)")
+                    Text("Status: \(status)")
                 }
                 
                 Spacer()
@@ -58,37 +61,19 @@ struct ProcessingModal: View {
         }
     }
     
-    func getCurrentLocationString() -> String {
-        if let location = locationManager.currentLocation {
-            return "\(location.coordinate.latitude), \(location.coordinate.longitude)"
-        } else {
-            print("Location not available.")
-            return ""
-        }
-    }
-    
-    func getCurrentLocation() -> CLLocationCoordinate2D {
-        if let location = locationManager.currentLocation {
-            return location.coordinate
-        } else {
-            print("Location not available.")
-            return CLLocationCoordinate2D()
-        }
-    }
-    
     func resetRoute() async {
         
-//    UNCOMMENT WHEN WE ARE READY TO TEST
+        //    UNCOMMENT WHEN WE ARE READY TO TEST
         
-        let currentLocation = getCurrentLocationString()
-
+        let currentLocation = LocationUtils.getCurrentLocationString()
+        
         do {
             let result = try await performAPICall(
                 origin: currentLocation,
-                destination: "kens+sushi+house+waterloo",
+                destination: destination,
                 mode: "driving"
             )
-
+            
             navRoute.updateRoute(apiResponse: result)
             
         } catch {
@@ -98,10 +83,11 @@ struct ProcessingModal: View {
     
     func startNavigation(navRoute: NavRoute) {
         print("Starting navigation...")
+        print(navRoute.routeSteps)
         
         Task {
-            while isNavigating, let currentLocation = locationManager.currentLocation {
-                let currentLocation = getCurrentLocation()
+            while isNavigating{
+                let currentLocation = LocationUtils.getCurrentLocationCoordinates()
                 
                 // Check distance to current polyline
                 var currentStepIndex = navRoute.currentStepIndex
@@ -129,9 +115,11 @@ struct ProcessingModal: View {
                     navRoute.advanceStepindex()
                     
                     print("Advancing to step index \(currentStepIndex)")
+                    
                     status = "Advancing to step index \(currentStepIndex)"
                 } else {
                     // Handle haptic feedback
+            
                 }
                 
                 // Stopping case with case
@@ -142,9 +130,10 @@ struct ProcessingModal: View {
                     return
                 }
                 
-                // Pause for one second before running again
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                // Pause for half a second
+                try? await Task.sleep(nanoseconds: 500_000_000)
             }
         }
     }
+    
 }
