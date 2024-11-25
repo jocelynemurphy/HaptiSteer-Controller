@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B45D51632CEE553300C1BD4B /* supersecretstuff.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D51622CEE553300C1BD4B /* supersecretstuff.swift */; };
+		B45D51662CEE88C000C1BD4B /* PolylineManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D51652CEE88C000C1BD4B /* PolylineManager.swift */; };
+		B45D51682CEE8B8800C1BD4B /* Polyline in Frameworks */ = {isa = PBXBuildFile; productRef = B45D51672CEE8B8800C1BD4B /* Polyline */; };
+		B45D516A2CEEA7E300C1BD4B /* ResponseTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D51692CEEA7E300C1BD4B /* ResponseTypes.swift */; };
+		B45D516C2CEEFC1C00C1BD4B /* NavRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D516B2CEEFC1C00C1BD4B /* NavRoute.swift */; };
+		B45D516E2CEFC67900C1BD4B /* ProcessingModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D516D2CEFC67800C1BD4B /* ProcessingModal.swift */; };
 		B4AC8D272CCD7B70000D7286 /* BLEManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AC8D262CCD7B70000D7286 /* BLEManager.swift */; };
 		FB69F2F12CDFEFB400381E61 /* CLLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB69F2F02CDFEFB400381E61 /* CLLocationManager.swift */; };
 		FBF925312CCD6EB60020CACF /* HaptiSteer_ControllerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBF925302CCD6EB60020CACF /* HaptiSteer_ControllerApp.swift */; };
@@ -36,6 +42,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B45D51622CEE553300C1BD4B /* supersecretstuff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = supersecretstuff.swift; sourceTree = "<group>"; };
+		B45D51652CEE88C000C1BD4B /* PolylineManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolylineManager.swift; sourceTree = "<group>"; };
+		B45D51692CEEA7E300C1BD4B /* ResponseTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseTypes.swift; sourceTree = "<group>"; };
+		B45D516B2CEEFC1C00C1BD4B /* NavRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavRoute.swift; sourceTree = "<group>"; };
+		B45D516D2CEFC67800C1BD4B /* ProcessingModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingModal.swift; sourceTree = "<group>"; };
 		B4AC8D262CCD7B70000D7286 /* BLEManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEManager.swift; sourceTree = "<group>"; };
 		FB69F2F02CDFEFB400381E61 /* CLLocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLLocationManager.swift; sourceTree = "<group>"; };
 		FB69F2F22CDFF04A00381E61 /* HaptiSteer-Controller-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "HaptiSteer-Controller-Info.plist"; sourceTree = SOURCE_ROOT; };
@@ -56,6 +67,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B45D51682CEE8B8800C1BD4B /* Polyline in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -102,10 +114,15 @@
 				FB69F2F22CDFF04A00381E61 /* HaptiSteer-Controller-Info.plist */,
 				FBF925302CCD6EB60020CACF /* HaptiSteer_ControllerApp.swift */,
 				FBF925322CCD6EB60020CACF /* ContentView.swift */,
+				B45D51652CEE88C000C1BD4B /* PolylineManager.swift */,
 				B4AC8D262CCD7B70000D7286 /* BLEManager.swift */,
 				FB69F2F02CDFEFB400381E61 /* CLLocationManager.swift */,
 				FBF925342CCD6EB80020CACF /* Assets.xcassets */,
 				FBF925362CCD6EB80020CACF /* Preview Content */,
+				B45D51622CEE553300C1BD4B /* supersecretstuff.swift */,
+				B45D51692CEEA7E300C1BD4B /* ResponseTypes.swift */,
+				B45D516B2CEEFC1C00C1BD4B /* NavRoute.swift */,
+				B45D516D2CEFC67800C1BD4B /* ProcessingModal.swift */,
 			);
 			path = "HaptiSteer Controller";
 			sourceTree = "<group>";
@@ -151,6 +168,9 @@
 			dependencies = (
 			);
 			name = "HaptiSteer Controller";
+			packageProductDependencies = (
+				B45D51672CEE8B8800C1BD4B /* Polyline */,
+			);
 			productName = "HaptiSteer Controller";
 			productReference = FBF9252D2CCD6EB60020CACF /* HaptiSteer Controller.app */;
 			productType = "com.apple.product-type.application";
@@ -223,6 +243,9 @@
 				Base,
 			);
 			mainGroup = FBF925242CCD6EB60020CACF;
+			packageReferences = (
+				B45D51642CEE887300C1BD4B /* XCRemoteSwiftPackageReference "Polyline" */,
+			);
 			productRefGroup = FBF9252E2CCD6EB60020CACF /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -266,9 +289,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				FBF925332CCD6EB60020CACF /* ContentView.swift in Sources */,
+				B45D516E2CEFC67900C1BD4B /* ProcessingModal.swift in Sources */,
 				FB69F2F12CDFEFB400381E61 /* CLLocationManager.swift in Sources */,
 				FBF925312CCD6EB60020CACF /* HaptiSteer_ControllerApp.swift in Sources */,
+				B45D51632CEE553300C1BD4B /* supersecretstuff.swift in Sources */,
 				B4AC8D272CCD7B70000D7286 /* BLEManager.swift in Sources */,
+				B45D516C2CEEFC1C00C1BD4B /* NavRoute.swift in Sources */,
+				B45D516A2CEEA7E300C1BD4B /* ResponseTypes.swift in Sources */,
+				B45D51662CEE88C000C1BD4B /* PolylineManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -361,6 +389,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
+				NEW_SETTING = "";
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
@@ -418,6 +447,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				NEW_SETTING = "";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
@@ -432,12 +462,15 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HaptiSteer Controller/Preview Content\"";
-				DEVELOPMENT_TEAM = AD85GVSW2B;
+				DEVELOPMENT_TEAM = WHTP766KU5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HaptiSteer-Controller-Info.plist";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app needs Bluetooth access at all times to connect to ESP32";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This app uses Bluetooth to connect to ESP32";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "We need your location to provide directions in the app";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "We need your location to provide services even when the app is in the background.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to provide personalized content and services.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -464,12 +497,15 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HaptiSteer Controller/Preview Content\"";
-				DEVELOPMENT_TEAM = AD85GVSW2B;
+				DEVELOPMENT_TEAM = WHTP766KU5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HaptiSteer-Controller-Info.plist";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app needs Bluetooth access at all times to connect to ESP32";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This app uses Bluetooth to connect to ESP32";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "We need your location to provide directions in the app";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "We need your location to provide services even when the app is in the background.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to provide personalized content and services.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -604,6 +640,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B45D51642CEE887300C1BD4B /* XCRemoteSwiftPackageReference "Polyline" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/raphaelmor/Polyline";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B45D51672CEE8B8800C1BD4B /* Polyline */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B45D51642CEE887300C1BD4B /* XCRemoteSwiftPackageReference "Polyline" */;
+			productName = Polyline;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FBF925252CCD6EB60020CACF /* Project object */;
 }

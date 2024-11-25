@@ -342,13 +342,12 @@ struct ContentView: View {
                             destination: destination,
                             mode: "driving"
                         )
-                        
                         navRoute = NavRoute(apiResponse: directions)
                         
                         if navRoute != nil {
                             showModal = true
                         }
-                        
+                                          
                     } else {
                         message = "theres a problem with the location"
                     }
