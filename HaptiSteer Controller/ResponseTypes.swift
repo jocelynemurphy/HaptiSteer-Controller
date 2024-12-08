@@ -102,4 +102,9 @@ struct TextValue: Codable {
 struct PolylineResponse: Codable {
     let points: String
 }
+
+struct NavigationCommand: Codable {
+    let maneuver: String
+    let distance: Double
+}
 // __________________________________________________________________________

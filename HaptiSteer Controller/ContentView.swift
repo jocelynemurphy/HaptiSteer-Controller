@@ -175,7 +175,7 @@ func sendManeuver(maneuver: String?){
 }
 
 struct ContentView: View {
-    @StateObject private var bleManager = BLEManager()
+    @EnvironmentObject var bleManager: BLEManager
     @State private var showModal = false
     @State private var navRoute: NavRoute? = nil
     @StateObject var locationManager = LocationTrackerViewController()
@@ -191,28 +191,36 @@ struct ContentView: View {
     // calling the api
     var body: some View {
         VStack {
+            // BT connection status + retry
+            HStack {
+                Spacer()
+                
+                Text(bleManager.isConnected ? "✨Connected to esp32✨" : "Not connected to esp32")
+                    .padding(.vertical, 20)
+                
+                if !bleManager.isConnected {
+                    Button(action: {
+                        bleManager.reconnect()
+                    }) {
+                        Image(systemName: "arrow.clockwise")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 16, height: 16) // Adjust the size as needed
+                            .foregroundColor(.white)
+                            .padding(6)
+                            .background(Color.white.opacity(0.2))
+                            .cornerRadius(4)
+                    }
+                }
+        
+                Spacer()
+            }
+            .background(bleManager.isConnected ? Color.green : Color.gray)
+            .cornerRadius(8)
+            
             Text("HaptiSteer Controller")
                 .font(.largeTitle)
                 .padding()
-            
-            if let message = bleManager.receivedMessage {
-                Text("Received Message: \(message)")
-                    .padding()
-            } else {
-                Text("No messages from esp :(")
-                    .padding()
-            }
-            
-            // Button to send a message to ESP32
-            Button(action: {
-                bleManager.sendMessage("Hello from iPhone")
-            }) {
-                Text("Send Message to ESP32")
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
             
             Text("Where to?")
                 .font(.title2)
@@ -223,6 +231,37 @@ struct ContentView: View {
             TextField("" ,text: $destination)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .font(.title3)
+            
+            
+            // Button to test route classes + navigating
+            Button(action: {
+                Task {
+                    if let location = locationManager.currentLocation {
+                        let starting_location = "\(location.coordinate.latitude),\(location.coordinate.longitude)"
+                        
+                        let directions = try await performAPICall(
+                            origin: starting_location,
+                            destination: destination,
+                            mode: "driving"
+                        )
+                        navRoute = NavRoute(apiResponse: directions)
+                        
+                        if navRoute != nil {
+                            showModal = true
+                        }
+                                          
+                    } else {
+                        message = "theres a problem with the location"
+                    }
+                }
+                
+            } ) {
+                Text("Start Navigation!")
+                    .padding()
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
             
             // Button to call API
             Button(action: {
@@ -262,7 +301,7 @@ struct ContentView: View {
                     }}
                 
             }) {
-                Text("Get Location")
+                Text("Check Location")
                     .padding()
                     .background(Color.orange)
                     .foregroundColor(.white)
@@ -331,35 +370,44 @@ struct ContentView: View {
 //                    .cornerRadius(10)
 //            }
             
-            // Button to test route classes + navigating
-            Button(action: {
-                Task {
-                    if let location = locationManager.currentLocation {
-                        let starting_location = "\(location.coordinate.latitude),\(location.coordinate.longitude)"
-                        
-                        let directions = try await performAPICall(
-                            origin: starting_location,
-                            destination: destination,
-                            mode: "driving"
-                        )
-                        navRoute = NavRoute(apiResponse: directions)
-                        
-                        if navRoute != nil {
-                            showModal = true
+            HStack {
+                // Turn-left button
+                Button(action: {
+                    Task {
+                        if bleManager.isConnected {
+                            bleManager.sendDirection("turn-left", distance: 5.0)
+                        } else {
+                            print("ESP32 not connected")
                         }
-                                          
-                    } else {
-                        message = "theres a problem with the location"
+                       
                     }
+                }) {
+                    Text("<- Test Left")
+                        .padding()
+                        .background(Color.purple)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
                 }
-                
-            } ) {
-                Text("test navigating!")
-                    .padding()
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+
+                // Turn-right button
+                Button(action: {
+                    Task {
+                        if bleManager.isConnected {
+                            bleManager.sendDirection("turn-right", distance: 5.0)
+                        } else {
+                            print("ESP32 not connected")
+                        }
+
+                    }
+                }) {
+                    Text("Test Right ->")
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
             }
+
             
             // send messages to be visible in the app
             TextEditor(text: $message)

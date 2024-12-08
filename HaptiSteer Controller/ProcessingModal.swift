@@ -3,19 +3,21 @@ import CoreLocation
 
 struct ProcessingModal: View {
     @StateObject var locationManager = LocationTrackerViewController()
-    @Environment(\.dismiss) var dismiss // Environment variable to dismiss the modal
+    @EnvironmentObject var bleManager: BLEManager
+    @Environment(\.dismiss) var dismiss
     
-    @State var status: String = "getting status" // Check if the user is on route
-    
+    @State var status: String = "getting status"
     let navRoute: NavRoute
     let destination: String
     
-    @State private var currentStepIndex = 0 // Track the current step
-    @State private var isNavigating = true // Control the navigation loop
+    @State private var currentStepIndex = 0
+    @State private var isNavigating = true
+    
+    // set to true to test the navigation with fake steps
+    @State private var testingMode: Bool = true
     
     var body: some View {
         ZStack {
-            // Background color
             Color(.sRGB, red: 106 / 255, green: 112 / 255, blue: 105 / 255, opacity: 1)
                 .ignoresSafeArea()
             
@@ -23,59 +25,63 @@ struct ProcessingModal: View {
                 HStack {
                     Button("X") {
                         isNavigating = false
-                        dismiss() // close the modal
+                        dismiss()
                     }
                     .padding(10)
                     .background(Color.pink)
                     .foregroundColor(.white)
                     .cornerRadius(8)
                     
-                    Spacer() // Push the button to the left
+                    Spacer()
                 }
                 .padding(.bottom, 40)
+                
                 VStack {
                     Text("🚀🚗 Processing Journey! 🚗🚀")
                         .font(.system(size: 24, weight: .bold))
                         .padding()
                     
-                    // info on the journey
-                    Text("Destination: \(destination)")
-                    Text("Step: \(navRoute.currentStepIndex)")
-                    Text("Upcoming Maneuver: \(navRoute.getStep(stepIndex: navRoute.currentStepIndex).direction)")
-                    Text("Distance to Turning point: \(checkDistanceToTurn(routeStep: navRoute.getStep(stepIndex: navRoute.currentStepIndex), location: LocationUtils.getCurrentLocationCoordinates()) ?? 0)")
                     
-                    Text("Distance to polyline: \(checkDistanceToPolyline(step: navRoute.getStep(stepIndex: navRoute.currentStepIndex), location: LocationUtils.getCurrentLocationCoordinates()) ?? 0)")
-                    Text("Status: \(status)")
+                    if !testingMode {
+                        Text("Destination: \(destination)")
+                        Text("Step: \(navRoute.currentStepIndex)")
+                        Text("Upcoming Maneuver: \(navRoute.getStep(stepIndex: navRoute.currentStepIndex).direction)")
+                        Text("Distance to Turning point: \(checkDistanceToTurn(routeStep: navRoute.getStep(stepIndex: navRoute.currentStepIndex), location: LocationUtils.getCurrentLocationCoordinates()) ?? 0)")
+                        
+                        Text("Distance to polyline: \(checkDistanceToPolyline(step: navRoute.getStep(stepIndex: navRoute.currentStepIndex), location: LocationUtils.getCurrentLocationCoordinates()) ?? 0)")
+                        Text("Status: \(status)")
+                    } else {
+                        Text("Destination: \(destination)")
+                        Text("Status: \(status)")
+                    }
+
                 }
                 
                 Spacer()
             }
         }
         .onAppear {
-            // immediately start navigation when the modal appears
-            startNavigation(navRoute: navRoute)
+            // Decide which navigation mode to start based on testingMode
+            if testingMode {
+                startTestNavigation()
+            } else {
+                startNavigation(navRoute: navRoute)
+            }
         }
         .onDisappear {
-            // stop navigation when the modal is swiped away
             isNavigating = false
         }
     }
     
     func resetRoute() async {
-        
-        //    UNCOMMENT WHEN WE ARE READY TO TEST
-        
         let currentLocation = LocationUtils.getCurrentLocationString()
-        
         do {
             let result = try await performAPICall(
                 origin: currentLocation,
                 destination: destination,
                 mode: "driving"
             )
-            
             navRoute.updateRoute(apiResponse: result)
-            
         } catch {
             print("Error: \(error)")
         }
@@ -86,43 +92,28 @@ struct ProcessingModal: View {
         print(navRoute.routeSteps)
         
         Task {
-            while isNavigating{
+            while isNavigating {
                 let currentLocation = LocationUtils.getCurrentLocationCoordinates()
-                
-                // Check distance to current polyline
                 var currentStepIndex = navRoute.currentStepIndex
-                
                 let currentStep = navRoute.getStep(stepIndex: currentStepIndex)
                 
-                // Check distance to the current polyline
                 let distanceToPolyline = checkDistanceToPolyline(step: currentStep, location: currentLocation) ?? 0
-                
                 if distanceToPolyline > 25 {
                     print("Off route, recalculating...")
-                    // Handle recalculation logic here
                     status = "Off route, recalculating..."
                     await resetRoute()
                 } else {
                     status = "On route :D"
                 }
                 
-                // Check distance to the next step
                 let distanceToTurn = checkDistanceToTurn(routeStep: currentStep, location: currentLocation) ?? 0
-                
                 if distanceToTurn < 15 {
-                    // Move to the next step
                     currentStepIndex += 1
                     navRoute.advanceStepindex()
-                    
                     print("Advancing to step index \(currentStepIndex)")
-                    
                     status = "Advancing to step index \(currentStepIndex)"
-                } else {
-                    // Handle haptic feedback
-            
                 }
                 
-                // Stopping case with case
                 if currentStepIndex >= navRoute.routeSteps.count {
                     print("End of route reached.")
                     status = "End of route reached"
@@ -130,10 +121,38 @@ struct ProcessingModal: View {
                     return
                 }
                 
-                // Pause for half a second
                 try? await Task.sleep(nanoseconds: 500_000_000)
             }
         }
     }
     
+    func startTestNavigation() {
+        print("Starting test navigation...")
+        
+        let fakeSteps: [(maneuver: String, distance: Double)] = [
+            ("turn-left", 5.0),
+            ("turn-right", 10.0),
+            ("straight", 7.5),
+            ("turn-left", 3.0)
+        ]
+                
+        Task {
+            for (maneuver, distance) in fakeSteps {
+                guard isNavigating else { break }
+                
+                
+                status = "step: \(maneuver) with distance \(distance)"
+      
+                bleManager.sendDirection(maneuver, distance: distance)
+                
+                // Simulate some delay between steps
+                try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 second
+            }
+            
+            // After steps are done, end navigation
+            print("All  steps completed.")
+            status = "Test route completed"
+            isNavigating = false
+        }
+    }
 }
