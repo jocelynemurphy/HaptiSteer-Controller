@@ -12,6 +12,15 @@ class NavRoute {
     
     var routeSteps: [RouteStep]
     var currentStepIndex: Int
+    var nextStepIndex: Int {
+        get {
+            if currentStepIndex < routeSteps.count - 1 {
+                return currentStepIndex + 1
+            } else {
+                return currentStepIndex
+            }
+        }
+    }
     
     init(
         apiResponse: DirectionsResponse
@@ -33,9 +42,12 @@ class NavRoute {
         
         // Adding
         for (index, step) in steps!.enumerated() {
+        
+            let nextStep = index == steps!.count - 1 ? steps![index] : steps![index + 1]
+            
             let polylineDecoded = decodePolyline(encodedPolyline: step.polyline.points)
             let routeStep = RouteStep(
-                direction: step.maneuver ?? "straight",
+                direction: nextStep.maneuver ?? "end of route",
                 polylineDecoded: polylineDecoded!,
                 polylineEncoded: step.polyline.points,
                 stepIndex: index,

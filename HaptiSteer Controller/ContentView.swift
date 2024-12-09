@@ -33,43 +33,38 @@ func performAPICall(origin: String, destination: String, mode: String) async thr
     return response
 }
 
-let maneuverMapping: [String: Int] = [ // mapping of all the different maneuvers to the number of pulses and instruction for pulsing
-    // L = -1, M = 0, R = 1. We may send over bluetooth the strings but this will roughly map which pulses.
-    "turn-slight-left": 1, // 2 L
-    "turn-sharp-left": 2, // 5 L
-    "uturn-left": 3, // 3L, 3L, 3L, (repeat until turned around) -> how does it know you've turned around?
-    "turn-left": 4, // 5 L
+// mapping of maneuvers
+let maneuverMapping: [String: Int] = [
+    "turn-slight-left": -1,
+    "turn-sharp-left": -1,
+    "uturn-left": -1,
+    "turn-left": -1,
+    "ramp-left": -1,
+    "fork-left": -1,
+    "roundabout-left": -1,
+    "end-of-road-left": -1,
+    "take-exit-left": -1,
+    "take-fork-left": -1,
+    "keep-left": -1,
     
-    "turn-slight-right": 5, // 2 R
-    "turn-sharp-right": 6, // 5 R
-    "uturn-right": 7, // 3R, 3R, 3R
-    "turn-right": 8, // 5R
+    "straight": 0,
+    "merge": 0,
+    "ferry": 0,
+    "ferry-train": 0,
+    "head": 0,
+    "continue": 0,
     
-    "straight": 9, // 2 S
-    "ramp-left": 10, // 2 R
-    "ramp-right": 11, // 2 R
-    "merge": 12, // 2 R or L (is there no merge command for R or L?)
-    
-    "fork-left": 13, // 2 L
-    "fork-right": 14, // 2 R
-    "ferry": 15, // N/A
-    "ferry-train": 16, // N/A
-    
-    "roundabout-left": 17, // 3L, 3L, 3L, -> could we know when they should signal right and exit?
-    "roundabout-right": 18, // 5 R
-    "end-of-road-left": 19, // 2L
-    "end-of-road-right": 20, // 2R
-    
-    "take-exit-left": 21, // 5L
-    "take-exit-right": 22, // 5R
-    "take-exit": 23, // 5R --> discuss this onw n
-    "take-fork-left": 24, // 2L
-    "take-fork-right": 25, // 2 R
-    
-    "head": 26, // ?
-    "keep-left": 27, // 1 L
-    "keep-right": 28, // 1 R
-    "continue": 29 // 1 BOTH
+    "turn-slight-right": 1,
+    "turn-sharp-right": 1,
+    "uturn-right": 1,
+    "turn-right": 1,
+    "ramp-right": 1,
+    "fork-right": 1,
+    "roundabout-right": 1,
+    "end-of-road-right": 1,
+    "take-exit-right": 1,
+    "take-fork-right": 1,
+    "keep-right": 1
 ]
 
 func calculateDistance(curr_lat: Double, curr_lng: Double, destination: String) async -> (Double, Double) {
@@ -137,38 +132,37 @@ func distFromLocation(curr_lat: Double, curr_lng: Double, destination: String) a
 }
 
 
-
-func sendVibrations(result: DirectionsResponse) {
-    let steps = result.routes[0].legs[0].steps
-    
-    for step in steps{
-        var distance_remaining = step.distance.value
-        let m_per_iteration = 5
-        var instruction_given = 0
-        
-        while distance_remaining > 0 {
-            print(distance_remaining, "m remaining.")
-            if distance_remaining < 10{
-                print("🚨🚨🚨🚨🚨")
-            }
-            else if distance_remaining < 25{
-                print("📳📳📳")
-            }
-            else if distance_remaining < 100{
-                print("...")
-                if instruction_given == 0{
-                    print("In ", distance_remaining, "m, ", step.maneuver)
-                }
-                instruction_given += 1
-            }
-            // else, no vibration, subtract distance
-            distance_remaining = distance_remaining - m_per_iteration
-        }
-        
-        print(step.maneuver)
-        // no distance remaining, go to the next step.
-    }
-}
+//func sendVibrations(result: DirectionsResponse) {
+//    let steps = result.routes[0].legs[0].steps
+//    
+//    for step in steps{
+//        var distance_remaining = step.distance.value
+//        let m_per_iteration = 5
+//        var instruction_given = 0
+//        
+//        while distance_remaining > 0 {
+//            print(distance_remaining, "m remaining.")
+//            if distance_remaining < 10{
+//                print("🚨🚨🚨🚨🚨")
+//            }
+//            else if distance_remaining < 25{
+//                print("📳📳📳")
+//            }
+//            else if distance_remaining < 100{
+//                print("...")
+//                if instruction_given == 0{
+//                    print("In ", distance_remaining, "m, ", step.maneuver)
+//                }
+//                instruction_given += 1
+//            }
+//            // else, no vibration, subtract distance
+//            distance_remaining = distance_remaining - m_per_iteration
+//        }
+//        
+//        print(step.maneuver)
+//        // no distance remaining, go to the next step.
+//    }
+//}
 
 func sendManeuver(maneuver: String?){
     print(maneuver)
@@ -263,34 +257,34 @@ struct ContentView: View {
                     .cornerRadius(10)
             }
             
-            // Button to call API
-            Button(action: {
-                Task {
-                    do {
-                                                
-                        let result = try await performAPICall(
-                            origin: "engineering+7+university+of+waterloo",
-                            destination: destination,
-                            mode: "driving"
-                        )
-                        
-                        print(result)
-                        
-                        // take the set of instructions and output vibrations accordingly
-                        sendVibrations(result: result);
-                        
-                    } catch {
-                        print("Error fetching directions: \(error)")
-                    }
-                }
-            }) {
-                Text("Get Directions")
-                    .padding()
-                    .background(Color.red)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            
+//            // Button to call API
+//            Button(action: {
+//                Task {
+//                    do {
+//                                                
+//                        let result = try await performAPICall(
+//                            origin: "engineering+7+university+of+waterloo",
+//                            destination: destination,
+//                            mode: "driving"
+//                        )
+//                        
+//                        print(result)
+//                        
+//                        // take the set of instructions and output vibrations accordingly
+//                        sendVibrations(result: result);
+//                        
+//                    } catch {
+//                        print("Error fetching directions: \(error)")
+//                    }
+//                }
+//            }) {
+//                Text("Get Directions")
+//                    .padding()
+//                    .background(Color.red)
+//                    .foregroundColor(.white)
+//                    .cornerRadius(10)
+//            }
+//            
             
             Button(action: {
                 Task {

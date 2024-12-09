@@ -13,8 +13,10 @@ struct ProcessingModal: View {
     @State private var currentStepIndex = 0
     @State private var isNavigating = true
     
-    // set to true to test the navigation with fake steps
+    // testing related variables
     @State private var testingMode: Bool = true
+    @State private var fakeManeuver: String = ""
+    @State private var fakeDistRemaining: Double = 0
     
     var body: some View {
         ZStack {
@@ -44,14 +46,19 @@ struct ProcessingModal: View {
                     
                     if !testingMode {
                         Text("Destination: \(destination)")
-                        Text("Step: \(navRoute.currentStepIndex)")
-                        Text("Upcoming Maneuver: \(navRoute.getStep(stepIndex: navRoute.currentStepIndex).direction)")
-                        Text("Distance to Turning point: \(checkDistanceToTurn(routeStep: navRoute.getStep(stepIndex: navRoute.currentStepIndex), location: LocationUtils.getCurrentLocationCoordinates()) ?? 0)")
+                        
+                        Text("Step: \(navRoute.currentStepIndex)/ \(navRoute.routeSteps.count)")
+                        
+                        Text("Upcoming Maneuver: \(navRoute.getStep(stepIndex: navRoute.nextStepIndex).direction)")
+                        
+                        Text("Distance to turning point: \(checkDistanceToTurn(routeStep: navRoute.getStep(stepIndex: navRoute.currentStepIndex), location: LocationUtils.getCurrentLocationCoordinates()) ?? 0)")
                         
                         Text("Distance to polyline: \(checkDistanceToPolyline(step: navRoute.getStep(stepIndex: navRoute.currentStepIndex), location: LocationUtils.getCurrentLocationCoordinates()) ?? 0)")
+                        
                         Text("Status: \(status)")
                     } else {
-                        Text("Destination: \(destination)")
+                        Text("Upcoming Maneuver: \(fakeManeuver)")
+                        Text("Distance to turning point: \(fakeDistRemaining)")
                         Text("Status: \(status)")
                     }
 
@@ -107,17 +114,22 @@ struct ProcessingModal: View {
                 }
                 
                 let distanceToTurn = checkDistanceToTurn(routeStep: currentStep, location: currentLocation) ?? 0
-                if distanceToTurn < 15 {
+                if distanceToTurn < 25 {
+                    // send direction to BLE
+                    bleManager.sendDirection(currentStep.direction, distance: distanceToTurn)
+                    
                     currentStepIndex += 1
                     navRoute.advanceStepindex()
                     print("Advancing to step index \(currentStepIndex)")
-                    status = "Advancing to step index \(currentStepIndex)"
+                    status = "Advancing to step index \(currentStepIndex), \(navRoute.getStep(stepIndex: currentStepIndex).direction)"
+                    try? await Task.sleep(nanoseconds: 3_000_000_000)
                 }
                 
-                if currentStepIndex >= navRoute.routeSteps.count {
+                if currentStepIndex == navRoute.routeSteps.count || !isNavigating {
                     print("End of route reached.")
-                    status = "End of route reached"
+                    status = "End of route reached 😎"
                     isNavigating = false
+                    
                     return
                 }
                 
@@ -129,28 +141,55 @@ struct ProcessingModal: View {
     func startTestNavigation() {
         print("Starting test navigation...")
         
+        // Define fake steps with maneuvers. Each step is a 100 meter segment
         let fakeSteps: [(maneuver: String, distance: Double)] = [
-            ("turn-left", 5.0),
-            ("turn-right", 10.0),
-            ("straight", 7.5),
-            ("turn-left", 3.0)
+            ("turn-left", 100.0),
+            ("turn-right", 100.0),
+            ("straight", 100.0),
+            ("turn-left", 100.0)
         ]
                 
         Task {
-            for (maneuver, distance) in fakeSteps {
-                guard isNavigating else { break }
+            for (maneuver, totalDistance) in fakeSteps {
+                guard isNavigating else {
+                    print("Navigation stopped.")
+                    break
+                }
                 
+                var distanceRemaining = totalDistance
+                let mPerIteration = 15.0  // Decrement per iteration
                 
-                status = "step: \(maneuver) with distance \(distance)"
-      
-                bleManager.sendDirection(maneuver, distance: distance)
+                fakeManeuver = maneuver
                 
-                // Simulate some delay between steps
-                try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 second
+                while distanceRemaining > 0 {
+                    print("\(distanceRemaining)m remaining for maneuver: \(fakeManeuver)")
+                    fakeDistRemaining = distanceRemaining
+                    
+                    if distanceRemaining < 25 {
+                        print("Sending maneuver to BLE: \(fakeManeuver) at \(fakeDistRemaining)m remaining.")
+                        bleManager.sendDirection(fakeManeuver, distance: fakeDistRemaining)
+                        
+                        break
+                    }
+                    
+                    // decrement distance remaining to simulate movement
+                    distanceRemaining -= mPerIteration
+                    if distanceRemaining < 0 { distanceRemaining = 0 } // prevent negative distance
+                    
+                    // delay between iterations
+                    try? await Task.sleep(nanoseconds: 1_000_000_000) // 0.5 second
+                }
+                
+                status = "Maneuver completed: \(fakeManeuver)"
+                
+                // Optional: Add a brief pause between maneuvers
+                try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
             }
             
-            // After steps are done, end navigation
-            print("All  steps completed.")
+            // After all steps are done, end navigation
+            print("All steps completed.")
+            
+            sen
             status = "Test route completed"
             isNavigating = false
         }

@@ -8,7 +8,7 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeriph
     private var esp32Peripheral: CBPeripheral?
     private var dataCharacteristic: CBCharacteristic?
     
-    private let serviceUUID = CBUUID(string: "4fafc201-1fb5-459e-8fcc-c5c9c331914a")
+    private let serviceUUID = CBUUID(string: "4fafc201-1fb5-459e-8fcc-c5c9c331914b")
     private let characteristicUUID = CBUUID(string: "beb5483e-36e1-4688-b7f5-ea07361b26a3")
     
     override init() {
