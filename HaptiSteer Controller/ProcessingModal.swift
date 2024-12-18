@@ -17,6 +17,8 @@ struct ProcessingModal: View {
     @State private var testingMode: Bool = true
     @State private var fakeManeuver: String = ""
     @State private var fakeDistRemaining: Double = 0
+    @State private var fakeStepCount: Int = 0
+    @State private var fakeStepTotal: Int = 0
     
     var body: some View {
         ZStack {
@@ -39,12 +41,12 @@ struct ProcessingModal: View {
                 .padding(.bottom, 40)
                 
                 VStack {
-                    Text("🚀🚗 Processing Journey! 🚗🚀")
-                        .font(.system(size: 24, weight: .bold))
-                        .padding()
-                    
                     
                     if !testingMode {
+                        Text("🚀🚗 Processing Journey! 🚗🚀")
+                            .font(.system(size: 24, weight: .bold))
+                            .padding()
+                        
                         Text("Destination: \(destination)")
                         
                         Text("Step: \(navRoute.currentStepIndex)/ \(navRoute.routeSteps.count)")
@@ -57,8 +59,16 @@ struct ProcessingModal: View {
                         
                         Text("Status: \(status)")
                     } else {
+                        Text("👩‍💻 Processing Test Journey! 👩‍💻")
+                            .font(.system(size: 24, weight: .bold))
+                            .padding()
+                        
+                        Text("Step: \(fakeStepCount)/\(fakeStepTotal)")
+                        
                         Text("Upcoming Maneuver: \(fakeManeuver)")
+                        
                         Text("Distance to turning point: \(fakeDistRemaining)")
+                        
                         Text("Status: \(status)")
                     }
 
@@ -114,7 +124,10 @@ struct ProcessingModal: View {
                 }
                 
                 let distanceToTurn = checkDistanceToTurn(routeStep: currentStep, location: currentLocation) ?? 0
-                if distanceToTurn < 25 {
+                if distanceToTurn < 35 {
+                    
+                    //TODO: Add integer mapping
+                    
                     // send direction to BLE
                     bleManager.sendDirection(currentStep.direction, distance: distanceToTurn)
                     
@@ -129,6 +142,8 @@ struct ProcessingModal: View {
                     print("End of route reached.")
                     status = "End of route reached 😎"
                     isNavigating = false
+                    
+                    bleManager.sendDirection("complete", distance: 0)
                     
                     return
                 }
@@ -148,6 +163,10 @@ struct ProcessingModal: View {
             ("straight", 100.0),
             ("turn-left", 100.0)
         ]
+        
+        fakeStepTotal = fakeSteps.count
+        status = "Start of test route"
+
                 
         Task {
             for (maneuver, totalDistance) in fakeSteps {
@@ -156,42 +175,43 @@ struct ProcessingModal: View {
                     break
                 }
                 
-                var distanceRemaining = totalDistance
+                var distanceToTurn = totalDistance
                 let mPerIteration = 15.0  // Decrement per iteration
                 
                 fakeManeuver = maneuver
                 
-                while distanceRemaining > 0 {
-                    print("\(distanceRemaining)m remaining for maneuver: \(fakeManeuver)")
-                    fakeDistRemaining = distanceRemaining
+                while distanceToTurn > 0 {
+                    print("\(distanceToTurn)m remaining for maneuver: \(fakeManeuver)")
+                    fakeDistRemaining = distanceToTurn
                     
-                    if distanceRemaining < 25 {
-                        print("Sending maneuver to BLE: \(fakeManeuver) at \(fakeDistRemaining)m remaining.")
-                        bleManager.sendDirection(fakeManeuver, distance: fakeDistRemaining)
+                    if distanceToTurn < 35 {
+                        print("Sending maneuver to BLE: \(fakeManeuver) at \(distanceToTurn)m remaining.")
+                        bleManager.sendDirection(fakeManeuver, distance: distanceToTurn)
                         
                         break
                     }
                     
                     // decrement distance remaining to simulate movement
-                    distanceRemaining -= mPerIteration
-                    if distanceRemaining < 0 { distanceRemaining = 0 } // prevent negative distance
+                    distanceToTurn -= mPerIteration
+                    if distanceToTurn < 0 { distanceToTurn = 0 } // prevent negative distance
                     
                     // delay between iterations
-                    try? await Task.sleep(nanoseconds: 1_000_000_000) // 0.5 second
+                    try? await Task.sleep(nanoseconds: 1_500_000_000) // 1.5sec
                 }
                 
                 status = "Maneuver completed: \(fakeManeuver)"
+                fakeStepCount += 1
                 
-                // Optional: Add a brief pause between maneuvers
+                //Add a brief pause between maneuvers
                 try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
             }
             
-            // After all steps are done, end navigation
+            // end navigation
             print("All steps completed.")
-            
-            sen
+            bleManager.sendDirection("complete", distance: 0)
             status = "Test route completed"
             isNavigating = false
+            
         }
     }
 }

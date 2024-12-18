@@ -107,4 +107,38 @@ struct NavigationCommand: Codable {
     let maneuver: String
     let distance: Double
 }
+
+// mapping of maneuvers
+let maneuverMapping: [String: Int] = [
+    "turn-slight-left": -1,
+    "turn-sharp-left": -1,
+    "uturn-left": -1,
+    "turn-left": -1,
+    "ramp-left": -1,
+    "fork-left": -1,
+    "roundabout-left": -1,
+    "end-of-road-left": -1,
+    "take-exit-left": -1,
+    "take-fork-left": -1,
+    "keep-left": -1,
+    
+    "straight": 0,
+    "merge": 0,
+    "ferry": 0,
+    "ferry-train": 0,
+    "head": 0,
+    "continue": 0,
+    
+    "turn-slight-right": 1,
+    "turn-sharp-right": 1,
+    "uturn-right": 1,
+    "turn-right": 1,
+    "ramp-right": 1,
+    "fork-right": 1,
+    "roundabout-right": 1,
+    "end-of-road-right": 1,
+    "take-exit-right": 1,
+    "take-fork-right": 1,
+    "keep-right": 1
+]
 // __________________________________________________________________________

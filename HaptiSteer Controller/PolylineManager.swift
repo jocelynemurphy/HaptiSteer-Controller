@@ -71,6 +71,8 @@ func distanceFromPoint(_ point: CLLocationCoordinate2D, toLineSegmentBetween sta
     return pointLocation.distance(from: projectionLocation)
 }
 
+
+// ONLY FOR TESTING
 func checkDistanceToPolyline2 (curr_lat: Double, curr_long: Double, encodedPolyline: String) -> Double? {
     // Example usage:
     let encodedPolyline = "qzihGvpqjNUNK_@K_@k@mB" // Example polyline
@@ -84,6 +86,7 @@ func checkDistanceToPolyline2 (curr_lat: Double, curr_long: Double, encodedPolyl
     return distance
 }
 
+// Actual usage
 func checkDistanceToPolyline(step: RouteStep, location: CLLocationCoordinate2D) -> Double? {
     let encodedPolyline = step.polylineEncoded
     

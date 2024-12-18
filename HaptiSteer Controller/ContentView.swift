@@ -33,40 +33,6 @@ func performAPICall(origin: String, destination: String, mode: String) async thr
     return response
 }
 
-// mapping of maneuvers
-let maneuverMapping: [String: Int] = [
-    "turn-slight-left": -1,
-    "turn-sharp-left": -1,
-    "uturn-left": -1,
-    "turn-left": -1,
-    "ramp-left": -1,
-    "fork-left": -1,
-    "roundabout-left": -1,
-    "end-of-road-left": -1,
-    "take-exit-left": -1,
-    "take-fork-left": -1,
-    "keep-left": -1,
-    
-    "straight": 0,
-    "merge": 0,
-    "ferry": 0,
-    "ferry-train": 0,
-    "head": 0,
-    "continue": 0,
-    
-    "turn-slight-right": 1,
-    "turn-sharp-right": 1,
-    "uturn-right": 1,
-    "turn-right": 1,
-    "ramp-right": 1,
-    "fork-right": 1,
-    "roundabout-right": 1,
-    "end-of-road-right": 1,
-    "take-exit-right": 1,
-    "take-fork-right": 1,
-    "keep-right": 1
-]
-
 func calculateDistance(curr_lat: Double, curr_lng: Double, destination: String) async -> (Double, Double) {
     @ObservedObject var locationManager = LocationTrackerViewController()
     
@@ -212,6 +178,8 @@ struct ContentView: View {
             .background(bleManager.isConnected ? Color.green : Color.gray)
             .cornerRadius(8)
             
+            Spacer()
+            
             Text("HaptiSteer Controller")
                 .font(.largeTitle)
                 .padding()
@@ -221,41 +189,45 @@ struct ContentView: View {
                 .bold()
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            // Input text box to set the destination
-            TextField("" ,text: $destination)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .font(.title3)
             
-            
-            // Button to test route classes + navigating
-            Button(action: {
-                Task {
-                    if let location = locationManager.currentLocation {
-                        let starting_location = "\(location.coordinate.latitude),\(location.coordinate.longitude)"
-                        
-                        let directions = try await performAPICall(
-                            origin: starting_location,
-                            destination: destination,
-                            mode: "driving"
-                        )
-                        navRoute = NavRoute(apiResponse: directions)
-                        
-                        if navRoute != nil {
-                            showModal = true
-                        }
-                                          
-                    } else {
-                        message = "theres a problem with the location"
-                    }
-                }
+            HStack{
+                // Input text box to set the destination
+                TextField("" ,text: $destination)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .font(.title3)
                 
-            } ) {
-                Text("Start Navigation!")
-                    .padding()
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+                
+                // Button to test route classes + navigating
+                Button(action: {
+                    Task {
+                        if let location = locationManager.currentLocation {
+                            let starting_location = "\(location.coordinate.latitude),\(location.coordinate.longitude)"
+                            
+                            let directions = try await performAPICall(
+                                origin: starting_location,
+                                destination: destination,
+                                mode: "driving"
+                            )
+                            navRoute = NavRoute(apiResponse: directions)
+                            
+                            if navRoute != nil {
+                                showModal = true
+                            }
+                                              
+                        } else {
+                            message = "theres a problem with the location"
+                        }
+                    }
+                    
+                } ) {
+                    Text("Start Navigation!")
+                        .padding()
+                        .background(Color.mint)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
             }
+           
             
 //            // Button to call API
 //            Button(action: {
@@ -285,7 +257,12 @@ struct ContentView: View {
 //                    .cornerRadius(10)
 //            }
 //            
+            Spacer()
             
+            Text("Testing section")
+                .font(.title3)
+                .bold()
+                .frame(alignment: .center)
             Button(action: {
                 Task {
                     if let location = locationManager.currentLocation {
@@ -396,7 +373,7 @@ struct ContentView: View {
                 }) {
                     Text("Test Right ->")
                         .padding()
-                        .background(Color.blue)
+                        .background(Color.purple)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -405,7 +382,7 @@ struct ContentView: View {
             
             // send messages to be visible in the app
             TextEditor(text: $message)
-                .frame(height: 200) // Height of the message box
+                .frame(height: 50) // Height of the message box
                 .border(Color.gray, width: 1) // Optional border to define the box
                 .padding()
         }
